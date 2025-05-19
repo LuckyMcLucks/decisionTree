@@ -35,17 +35,23 @@ for row in numpy_array:
 dataframe = pd.DataFrame.from_records(numpy_array,columns = ("ID","Age","Occupation","Marital Status","Education Level","Credit Default","Housing Loan","Personal Loan","Contact Method","Campaign Calls","Previous Contact Days","Subscription Status")) # np.array to pd.DataFrame
 
 
-feature_cols = ["Age","Occupation","Education Level","Contact Method","Campaign Calls","Previous Contact Days"]
+feature_cols = ["Age","Occupation","Contact Method","Campaign Calls","Previous Contact Days"]
 x =dataframe[feature_cols] # Features
 y =dataframe["Subscription Status"] # Target variable
 x = pd.get_dummies(x) 
 y= pd.get_dummies(y) 
 # Split dataset into training set and test set
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, random_state=1) # 70% training and 30% test
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=1) # 70% training and 30% test
 
 
 # Create Decision Tree classifer object
-clf = tree.DecisionTreeClassifier(max_depth=1,max_features=0.5)
+
+clf = tree.DecisionTreeClassifier(max_depth=3,max_features=0.2)
+clf = clf.fit(x_train,y_train)
+y_pred = clf.predict(x_test)
+
+
+
 
 # Train Decision Tree Classifer
 clf = clf.fit(x_train,y_train)
