@@ -14,10 +14,8 @@ from sklearn.tree import export_graphviz
 from six import StringIO  
 from IPython.display import Image  
 import pydotplus
-
-
-
-
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 db = sqlite3.connect("data/bmarket.db")
 cursor = db.cursor()
 
@@ -35,18 +33,41 @@ for row in numpy_array:
 dataframe = pd.DataFrame.from_records(numpy_array,columns = ("ID","Age","Occupation","Marital Status","Education Level","Credit Default","Housing Loan","Personal Loan","Contact Method","Campaign Calls","Previous Contact Days","Subscription Status")) # np.array to pd.DataFrame
 
 
+dataframe.drop(['ID'], axis=1, inplace=True)
+
+
+
+
+
 feature_cols = ["Age","Occupation","Contact Method","Campaign Calls","Previous Contact Days"]
 x =dataframe[feature_cols] # Features
 y =dataframe["Subscription Status"] # Target variable
 x = pd.get_dummies(x) 
 y= pd.get_dummies(y) 
-# Split dataset into training set and test set
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=1) # 70% training and 30% test
 
+
+
+
+# PCA 
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(x)
+print(X_scaled[:4])
+
+pca = PCA(n_components=4)
+X_pca = pca.fit_transform(X_scaled)
+print(X_pca[:4])
+print("Explained variance:", pca.explained_variance_ratio_)
+print("Cumulative:", np.cumsum(pca.explained_variance_ratio_))
+
+
+
+# Split dataset into training set and test set
+
+x_train, x_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.3, random_state=1) # 70% training and 30% test
 
 # Create Decision Tree classifer object
 
-clf = tree.DecisionTreeClassifier(max_depth=3,max_features=0.2)
+clf = tree.DecisionTreeClassifier(max_depth=12)
 clf = clf.fit(x_train,y_train)
 y_pred = clf.predict(x_test)
 
@@ -78,39 +99,3 @@ print(f"Accuracy: {accuracy:.2f}")
 print("\nClassification Report:\n", classification_rep)
 print("Gini Report:", gini)
 
-
-"""
-
-print("Random Forest_______________")
-
-# Initialize RandomForestClassifier
-rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-
-# Fit the classifier to the training data
-rf_classifier.fit(x_train, y_train)
-
-# Make predictions
-y_pred = rf_classifier.predict(x_test)
-
-# Calculate accuracy and classification report
-accuracy = accuracy_score(y_test, y_pred)
-classification_rep = classification_report(y_test, y_pred)
-
-# Print the results
-print(f"Accuracy: {accuracy:.2f}")
-print("\nClassification Report:\n", classification_rep)
-
-
-
-print("Knn ")
-knn = KNeighborsClassifier(n_neighbors=3)
-knn.fit(x_train, y_train)
-y_pred = knn.predict(x_test)
-
-# Calculate accuracy and classification report
-accuracy = accuracy_score(y_test, y_pred)
-classification_rep = classification_report(y_test, y_pred)
-
-# Print the results
-print(f"Accuracy: {accuracy:.2f}")
-print("\nClassification Report:\n", classification_rep)"""
